@@ -28,7 +28,7 @@ var left = Math.random() * 200 - 40;
 function move() {
   circles.transition()
           .duration(1000)
-          .tween('track-position', tracker)
+          // .tween('track-position', tracker)
           .attr('cx', function() { return Math.floor(Math.random() * 700) + 40; })
           .attr('cy', function() { return Math.floor(Math.random() * 600) + 40; });
 }
@@ -76,42 +76,74 @@ var update = function(num) {
 
 var counter = 0;
 
-setInterval (function() { update([counter++]); });
+setInterval (function() { update([counter++]); }, 500);
 
 ////////////////////////////// Collision Detection
 
-function collide() {
-    node = this.node();
-    nodeBox = node.getBBox();
-    nodeLeft = nodeBox.x;
-    nodeRight = nodeBox.x + nodeBox.width;
-    nodeTop = nodeBox.y;
-    nodeBottom = nodeBox.y + nodeBox.height;
+// function to calculate pythagorean theorem
+var distance = function(mouseX, mouseY, enemyX, enemyY)  {
+  return Math.sqrt(Math.pow((enemyY - mouseY),2) + Math.pow((enemyX - mouseX), 2));
+};
 
-    d3.selectAll("circle")
-        .attr("fill", function() {
-            if (this !== node) {
-                otherBox = this.getBBox();
-                otherLeft = otherBox.x;
-                otherRight = otherBox.x + otherBox.width;
-                otherTop = otherBox.y;
-                otherBottom = otherBox.y + otherBox.height;
+var collision = function() {
 
-                collideHoriz = nodeLeft &lt; otherRight &amp;&amp; nodeRight &gt; otherLeft;
-                collideVert = nodeTop &lt; otherBottom &amp;&amp; nodeBottom &gt; otherTop;
+  var mouse = d3.transform(
+              d3.select("circle")
+                .attr("transform"));
+  var mouseX = mouse.translate[0];
+  var mouseY = mouse.translate[1];
+console.log(mouseX, mouseY)
 
-                if ( collideHoriz &amp;&amp; collideVert) {
-                    return "tomato";
-                } else {
-                    return "none"
-                }
+};
 
-            } else {
-                return "none";
-            }
-        });
-}
+setInterval(function() { collision(); }, 1000);
 
+
+
+// function to detect collision
+  // grab mouse current locations with d3
+  // iterate through enemy circles
+    // grab each of the enemy coordinates 
+
+    // apply coordinate to distance 
+    // if distance is < 15
+
+      // add to collisions count
+      // if this current score is > high score
+        // set high score to current score
+    // reset current score to 0 
+
+// function collide() {
+//     node = this.node();
+//     nodeBox = node.getBBox();
+//     nodeLeft = nodeBox.x;
+//     nodeRight = nodeBox.x + nodeBox.width;
+//     nodeTop = nodeBox.y;
+//     nodeBottom = nodeBox.y + nodeBox.height;
+
+//     d3.selectAll("circle")
+//         .attr("fill", function() {
+//             if (this !== node) {
+//                 otherBox = this.getBBox();
+//                 otherLeft = otherBox.x;
+//                 otherRight = otherBox.x + otherBox.width;
+//                 otherTop = otherBox.y;
+//                 otherBottom = otherBox.y + otherBox.height;
+
+//                 collideHoriz = nodeLeft ; otherRight && nodeRight; otherLeft;
+//                 collideVert = nodeTop ; otherBottom && nodeBottom; otherTop;
+
+//                 if ( collideHoriz && collideVert) {
+//                     return "tomato";
+//                 } else {
+//                     return "none"
+//                 }
+
+//             } else {
+//                 return "none";
+//             }
+//         });
+// }
 
 
 
