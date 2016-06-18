@@ -4,8 +4,8 @@
 
 var svgContainer = d3.select(".board")
                      .append("svg")
-                     .attr("width", 800)
-                     .attr("height", 650);
+                     .attr("width", 1000)
+                     .attr("height", 600);
 
 /////////////////////////////// Create Enemies
 
@@ -14,24 +14,30 @@ var enemiesID = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 var circles = svgContainer.selectAll("circle")
                           .data(enemiesID)
                           .enter()
-                          .append("circle");
+                          .append("svg:image");
 
 var circleAttributes = circles
-                       .attr("cx", function() { return Math.random() * 800 - 40; })
-                       .attr("cy", function() { return Math.random() * 700 - 40; })
-                       .attr("r", 15)
+                       .attr("x", function() { return Math.random() * 950 - 40; })
+                       .attr("y", function() { return Math.random() * 500 - 40; })
+                       .attr('width', 35)
+                       .attr('height', 59)
+                       .attr("xlink:href", "../img/rsz_jellyfish-purple.png")
                        .attr('class', 'enemy')
                        .style("fill", "red");
 
 var top = Math.random() * 200 - 40;
 var left = Math.random() * 200 - 40;
 
+// var t = d3.transition() 
+//           .duration(200)
+//           .ease(d3.easeLinear);
+
 function move() {
   circles.transition()
           .duration(1000)
           // .tween('track-position', tracker)
-          .attr('cx', function() { return Math.floor(Math.random() * 700) + 40; })
-          .attr('cy', function() { return Math.floor(Math.random() * 600) + 40; })
+          .attr('x', function() { return Math.floor(Math.random() * 950) + 40; })
+          .attr('y', function() { return Math.floor(Math.random() * 500) + 40; })
           .tween('custom', tweenWithCollisionDetection)
           .each('end', move);
 }
@@ -42,29 +48,28 @@ setInterval(function() { move(); }, 1000);
 /////////////////////////////// Create mouse
 
 var drag = d3.behavior.drag()
-             .on('dragstart', function() { dragCircle.style('fill', 'yellow'); })
-             .on('drag', function() { dragCircle.attr('cx', d3.event.x)
-                                                .attr('cy', d3.event.y); })
-
-             .on('dragend', function() { dragCircle.style('fill', 'black'); });
+             .on('drag', function() { dragCircle.attr('x', d3.event.x - 45)
+                                                .attr('y', d3.event.y - 45); });
 
 var dragCircle = svgContainer.selectAll(".draggableCircle")
-                          .data([{x: 350, y: 350, r: 15}])
+                          .data([{x: 500, y: 275}])
                           .enter()
-                          .append("svg:circle")
+                          .append("svg:image")
                           .attr('class', 'draggableCircle')
-                          .attr('cx', function(d) { return d.x; })
-                          .attr('cy', function(d) { return d.y; })
-                          .attr('r', function(d) { return d.r; })
+                          .attr('x', function(d) { return d.x; })
+                          .attr('y', function(d) { return d.y; })
+                          .attr('height', 52)
+                          .attr('width', 75)
+                          // .attr('r', function(d) { return d.r; })
+                          .attr('xlink:href', '../img/rsz_nemo.png')
                           // .attr("transform", "translate(" + x + "," + y + ")")
-                          .call(drag)
-                          .style("fill", "black");
+                          .call(drag);
 
 
 /////////////////////////////// Set current score counter
 
-var update = function(num) {
-  var col = d3.select('.current')
+var update = function(scoreType, num) {
+  var col = d3.select(scoreType)
     .selectAll('span')
     .data(num, function(d) { return d; })
     .text(function(d) { return d; });
@@ -79,7 +84,7 @@ var update = function(num) {
 
 var counter = 0;
 
-setInterval (function() { update([counter++]); }, 500);
+setInterval (function() { update('.current', [counter++]); }, 500);
 
 ////////////////////////////// Collision Detection
 
@@ -100,67 +105,27 @@ var collision = function(enemy, collidedCallback) {
   var mouseY = playerCoord.y;
   // console.log(enemy[0]);
 
-    var separation = distance(mouseX, mouseY, enemy[0][0].getBBox().x, enemy[0][0].getBBox().y);
-    if (separation < 35) {
-      collidedCallback();
-    }
+  var separation = distance(mouseX - 45, mouseY - 45, enemy[0][0].getBBox().x, enemy[0][0].getBBox().y);
+  if (separation < 50) {
+    collidedCallback();
+  }
 };
+
+var collisionCount = 0;
+var highScore = 0;
 
 var onCollision = function() {
-  //complete: update scores
+  // update high score
+  if (counter > highScore) {
+    highScore = counter;
+    update('.highscore', [counter]);
+  } 
+  // update current score
   counter = 0;
-  update([counter++]);
+  update('.current', [counter++]);
+  //high score
 
+  // update collision
+  update('.collisions', [++collisionCount]);
 };
-
-
-
-// function to detect collision
-  // grab mouse current locations with d3
-  // iterate through enemy circles
-    // grab each of the enemy coordinates 
-
-    // apply coordinate to distance 
-    // if distance is < 15
-
-      // add to collisions count
-      // if this current score is > high score
-        // set high score to current score
-    // reset current score to 0 
-
-// function collide() {
-//     node = this.node();
-//     nodeBox = node.getBBox();
-//     nodeLeft = nodeBox.x;
-//     nodeRight = nodeBox.x + nodeBox.width;
-//     nodeTop = nodeBox.y;
-//     nodeBottom = nodeBox.y + nodeBox.height;
-
-//     d3.selectAll("circle")
-//         .attr("fill", function() {
-//             if (this !== node) {
-//                 otherBox = this.getBBox();
-//                 otherLeft = otherBox.x;
-//                 otherRight = otherBox.x + otherBox.width;
-//                 otherTop = otherBox.y;
-//                 otherBottom = otherBox.y + otherBox.height;
-
-//                 collideHoriz = nodeLeft ; otherRight && nodeRight; otherLeft;
-//                 collideVert = nodeTop ; otherBottom && nodeBottom; otherTop;
-
-//                 if ( collideHoriz && collideVert) {
-//                     return "tomato";
-//                 } else {
-//                     return "none"
-//                 }
-
-//             } else {
-//                 return "none";
-//             }
-//         });
-// }
-
-
-
-
 
