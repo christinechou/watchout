@@ -20,6 +20,7 @@ var circleAttributes = circles
                        .attr("cx", function() { return Math.random() * 800 - 40; })
                        .attr("cy", function() { return Math.random() * 700 - 40; })
                        .attr("r", 15)
+                       .attr('class', 'enemy')
                        .style("fill", "red");
 
 var top = Math.random() * 200 - 40;
@@ -30,7 +31,10 @@ function move() {
           .duration(1000)
           // .tween('track-position', tracker)
           .attr('cx', function() { return Math.floor(Math.random() * 700) + 40; })
-          .attr('cy', function() { return Math.floor(Math.random() * 600) + 40; });
+          .attr('cy', function() { return Math.floor(Math.random() * 600) + 40; })
+          // .transition()
+          // .duration(1000)
+          .tween('custom', tweenWithCollisionDetection);
 }
 
 setInterval(function() { move(); }, 1000);
@@ -85,18 +89,37 @@ var distance = function(mouseX, mouseY, enemyX, enemyY)  {
   return Math.sqrt(Math.pow((enemyY - mouseY),2) + Math.pow((enemyX - mouseX), 2));
 };
 
-var collision = function() {
-
-  var mouse = d3.transform(
-              d3.select("circle")
-                .attr("transform"));
-  var mouseX = mouse.translate[0];
-  var mouseY = mouse.translate[1];
-console.log(mouseX, mouseY)
-
+var tweenWithCollisionDetection = function(endData) {
+  var enemy = d3.select(this);
+  return collision(enemy, onCollision);
 };
 
-setInterval(function() { collision(); }, 1000);
+var collision = function(enemy, collidedCallback) {
+  var player = d3.select('svg').select('.draggableCircle');
+  var playerCoord = player[0][0].getBBox();
+  var mouseX = playerCoord.x;
+  var mouseY = playerCoord.y;
+  console.log(enemy[0]);
+
+   // separation = distance(mouseX, mouseY, enemy.getBBox().x, enemy.getBBox().y);
+  // var enemies = d3.select('svg').selectAll('.enemy')[0];
+  collidedCallback(player, enemy);
+  // enemies.forEach(function(enemy, i) {
+  //   // radiusSum = parseFloat(enemy, attr('r')) + player.r;
+  //   // console.log(enemy, 'index:',i)
+  //   separation = distance(mouseX, mouseY, enemy.getBBox().x, enemy.getBBox().y);
+  //   if (separation < 35) {
+  //     console.log(collidedCallback);
+
+  //     collidedCallback(player, enemy);
+    // }
+  // });
+};
+
+var onCollision = function() {
+  //complete: update scores
+  update([0]);
+};
 
 
 
